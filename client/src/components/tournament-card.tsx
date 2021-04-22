@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import {
   Card,
@@ -7,7 +6,6 @@ import {
   H4,
 } from "@blueprintjs/core";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../services/db";
 export interface TournamentCardProps {
   tournamentSummary: model.TournamentSummary;
 }

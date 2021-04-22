@@ -11,8 +11,8 @@ export interface TournamentIndexProps {
   tournamentSummaries: model.TournamentSummary[];
 }
 
+// Put component in ../../components/tournament-index.tsx
 export default function TournamentIndex({ tournamentSummaries }: TournamentIndexProps) {
-  console.log(tournamentSummaries);
   const tournamentCards = tournamentSummaries.map((ts) => {
     return (
       <TournamentCard tournamentSummary={ts} />
@@ -29,15 +29,15 @@ export default function TournamentIndex({ tournamentSummaries }: TournamentIndex
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const snapshot = await dbw.getTournamentCollection().get();
-  const tournamentSummaries = snapshot.docs.map((docRef) => {
-    const tournament = docRef.data();
+  // TODO: use snapshot.docChanges instead.
+  const tournamentSummaries = snapshot.docs.map((doc) => {
+    const tournament = doc.data();
     return {
       name: tournament.name,
-      id: docRef.id,
+      id: doc.id,
       participantCount: tournament.participantCount
     };
   });
-  console.log(tournamentSummaries);
   return {
     props: {
       tournamentSummaries

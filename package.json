@@ -1,4 +1,11 @@
 {
-    "private": true,
-    "workspaces": ["shared", "client", "firebase"]
+  "private": true,
+  "workspaces": ["shared", "client", "firebase"],
+  "scripts": {
+    "build": "yarn workspaces run build",
+    "start": "cd client; ../node_modules/.bin/next start -p $PORT"
+  },
+  "engines": {
+    "node": "14"
+  }
 }

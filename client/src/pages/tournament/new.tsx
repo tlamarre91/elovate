@@ -1,4 +1,4 @@
-import TournamentPage from "./[id]";
+import EditTournamentPage from "../../components/edit-tournament-page";
 export default function NewTournamentPage() {
-  return <TournamentPage />;
+  return <EditTournamentPage />;
 }

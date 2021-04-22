@@ -3,11 +3,12 @@ import { Button, Card, H3, H4 } from "@blueprintjs/core";
 import { model } from "shared";
 import { handleStringChange } from "../util";
 
+// TODO: factor out ParticipantProps
 export interface ParticipantCardProps {
   selected?: boolean;
-  id?: string;
-  name?: string;
-  email?: string;
+  id?: string | null;
+  name?: string | null;
+  email?: string | null;
   onRemove?: (participantId: string) => void;
 }
 
@@ -19,7 +20,7 @@ export default function ParticipantCard(props: ParticipantCardProps) {
         <div className="participant-name">{name}</div>
         <Button
           minimal={true}
-          className="participant-delete"
+          className="participant-delete-button"
           icon="cross"
           onClick={() => {
             if (id != undefined) onRemove?.(id);

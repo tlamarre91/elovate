@@ -7,6 +7,17 @@ import {
   PARTICIPANT_COLLECTION_ID,
 } from "./constants";
 
+/**
+ * How much time must pass before a given participants collection can be reordered?
+ */
+const REORDER_DELAY_MS = 3000;
+
+/**
+ * Return an object with randomOrderValue property, to be passed in update to a
+ * TournamentParticipant.
+ */
+const _makeRov = () => ({ randomOrderValue: Math.random() });
+
 export interface User {
   id?: string;
   username: string;
@@ -63,9 +74,23 @@ export class DatabaseWrapper {
   async getTournament(tournamentId: string): Promise<model.Tournament | null> {
     const ref = this.getTournamentDocRef(tournamentId);
     const doc = await ref.get();
-    console.log("GOT");
-    console.log(doc);
     return doc.data() ?? null;
+  }
+
+  /**
+   * Add or update a tournament, depending on whether tournament.id is set.
+   */
+  async saveTournament(tournament: model.Tournament) {
+    let docRef: firebase.firestore.DocumentReference<model.Tournament>;
+    if (tournament.id) {
+      docRef = this.getTournamentDocRef(tournament.id);
+    } else {
+      docRef = this.getTournamentCollection()
+        .withConverter(model.tournamentConverter)
+        .doc();
+    }
+    await docRef.set(tournament);
+    return docRef;
   }
 
   getParticipantsCollection(tournamentId: string) {
@@ -90,14 +115,33 @@ export class DatabaseWrapper {
       .delete();
   }
 
-  async saveTournament(tournament: model.Tournament) {
-    let docRef;
-    if (tournament.id) {
-      docRef = this.getTournamentDocRef(tournament.id);
-    } else {
-      docRef = this.getTournamentCollection().doc();
+  // TODO: Rate-limit this function (probably by checking tournament.orderedAt)
+  // since it's N reads, N writes.
+  // TODO: Can we do this with a batched write?
+  /**
+   * Set the "random" field on each participant of a tournament.
+   * @param participantIds
+   *   List of IDs of participants to randomize, rather than updating all
+   */
+  async randomizeParticipants(tournamentId: string, participantIds?: string[]) {
+    const t = await this.getTournament(tournamentId);
+    if (! t?.id?.length) {
+      return;
     }
-    docRef.set(tournament);
+    const dt = Date.now() - (t.orderedAt?.toMillis() ?? 0);
+    if (dt < REORDER_DELAY_MS) {
+      throw new Error(`Can't randomize participants faster than once every ${REORDER_DELAY_MS} ms`);
+    }
+    if (participantIds?.length) {
+      participantIds.forEach((id) => {
+        this.getParticipantsCollection(tournamentId).doc(id).update(_makeRov());
+      });
+    } else {
+      const ps = await this.getParticipantsCollection(tournamentId).get();
+      ps.forEach((doc) => {
+        doc.ref.update(_makeRov());
+      });
+    }
   }
 
   async pushTournamentEvent(

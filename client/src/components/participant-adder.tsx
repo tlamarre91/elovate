@@ -30,7 +30,6 @@ export default function ParticipantAdder(props: ParticipantAdderProps) {
     const p: model.TournamentParticipant = new model.TournamentParticipant({
       name, email
     });
-    console.log(p);
     onAdd(p);
   }, [name, email]);
   if (!enabled) {

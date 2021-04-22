@@ -1,0 +1,13 @@
+steps:
+- name: node:14
+  entrypoint: yarn
+  args: ['install']
+- name: node:14
+  entrypoint: yarn
+  args: ['workspace', 'shared', 'build']
+- name: node:14
+  entrypoint: yarn
+  args: ['workspace', 'client', 'build']
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'bash'
+  args: ['-c', 'gcloud app deploy']
