@@ -14,6 +14,10 @@ html, body
   box-sizing: border-box;
 }
 
+button {
+  margin: $tiny;
+}
+
 .container {
   min-height: 100vh;
   padding: 0 $comfy;
@@ -130,6 +134,7 @@ code {
 }
 
 .tournament-card {
+  margin: $comfy;
 }
 
 .card a {

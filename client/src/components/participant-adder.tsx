@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useCallback,
+  useState
+} from "react";
 import {
   Button,
   InputGroup
@@ -22,18 +25,18 @@ export default function ParticipantAdder(props: ParticipantAdderProps) {
     onChange,
     onEnable
   } = props;
+  const onSubmit = useCallback(() => {
+    const p: model.TournamentParticipant = {
+      name
+    };
+    onAdd(p);
+  }, [name]);
   if (!enabled) {
     return (
       <Button onClick={onEnable}>
         Add participant
       </Button>
     );
-  }
-  const onSubmit = () => {
-    const p: model.TournamentParticipant = {
-      name
-    };
-    onAdd(p);
   }
   return (
     <div className="participant-adder">

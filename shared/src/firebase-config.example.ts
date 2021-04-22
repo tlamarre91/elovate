@@ -1,3 +1,4 @@
+// Edit and rename to firebase-config.ts
 export const firebaseConfig = {
     "apiKey": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
     "authDomain": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
