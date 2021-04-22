@@ -12,6 +12,7 @@ export class Tournament {
   category: TournamentCategory;
   participantCount: number;
   constructor(options: Partial<Tournament> = {}) {
+    this.id = options.id;
     this.name = options.name ?? "";
     this.createdAt = options.createdAt ?? firebase.firestore.Timestamp.now();
     this.category = options.category ?? TournamentCategory.Bracket;
@@ -26,7 +27,9 @@ type TS_PROPS = "id"
 export type TournamentSummary = Pick<Tournament, TS_PROPS>;
 
 function tournamentToFirestore(obj: Tournament): firebase.firestore.DocumentData {
-  return { ...obj };
+  const doc = { ...obj };
+  delete doc.id;
+  return doc;
 }
 
 function tournamentFromFirestore(
@@ -35,7 +38,11 @@ function tournamentFromFirestore(
 ): Tournament {
   // TODO: populate events here?
   const data = snapshot.data(options);
-  return new Tournament(data);
+  const obj = {
+    id: snapshot.id,
+    ...data
+  };
+  return new Tournament(obj);
 }
 
 export const tournamentConverter = {
@@ -62,6 +69,7 @@ function eventFromFirestore(
   options: firebase.firestore.SnapshotOptions
 ): Tournament {
   // TODO: populate events here?
+  // TODO: grab ID like in participantFromFirestore
   const data = snapshot.data(options);
   return new Tournament(data);
 }
@@ -74,14 +82,22 @@ export const tournamentEventConverter = {
 export class TournamentParticipant {
   id?: string;
   name: string;
+  email: string | null;
+  createdAt: firebase.firestore.Timestamp;
   constructor(options: Partial<TournamentParticipant>) {
     this.id = options.id;
     this.name = options.name ?? "";
+    this.email = options.email ?? null;
+    console.log(this.email);
+    this.createdAt = options.createdAt ?? firebase.firestore.Timestamp.now()
   }
 }
 
 function participantToFirestore(obj: TournamentParticipant): firebase.firestore.DocumentData {
-  return { ...obj };
+  const doc = { ...obj };
+  delete doc.id;
+  console.log(doc);
+  return doc;
 }
 
 function participantFromFirestore(
@@ -89,7 +105,11 @@ function participantFromFirestore(
   options: firebase.firestore.SnapshotOptions
 ): TournamentParticipant {
   const data = snapshot.data(options);
-  return new TournamentParticipant(data);
+  const obj = {
+    id: snapshot.id,
+    ...data
+  };
+  return new TournamentParticipant(obj);
 }
 
 export const tournamentParticipantConverter = {

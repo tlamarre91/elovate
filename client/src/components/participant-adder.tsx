@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useState
 } from "react";
 import {
@@ -12,25 +13,26 @@ import { handleStringChange } from "../util";
 export interface ParticipantAdderProps {
   enabled?: boolean;
   name?: string;
+  email?: string;
   onAdd: (p: model.TournamentParticipant) => void;
-  onChange: (val: string) => void;
   onEnable: () => void;
 }
 
 export default function ParticipantAdder(props: ParticipantAdderProps) {
   const {
     enabled = false,
-    name = "",
     onAdd,
-    onChange,
     onEnable
   } = props;
-  const onSubmit = useCallback(() => {
-    const p: model.TournamentParticipant = {
-      name
-    };
+  const [name, setName] = useState(props.name ?? "");
+  const [email, setEmail] = useState(props.email ?? "");
+  const onSubmit = useCallback(async () => {
+    const p: model.TournamentParticipant = new model.TournamentParticipant({
+      name, email
+    });
+    console.log(p);
     onAdd(p);
-  }, [name]);
+  }, [name, email]);
   if (!enabled) {
     return (
       <Button onClick={onEnable}>
@@ -42,8 +44,13 @@ export default function ParticipantAdder(props: ParticipantAdderProps) {
     <div className="participant-adder">
       <InputGroup
         value={name}
-        onChange={handleStringChange(onChange)}
-        placeholder={"Add participant"}
+        onChange={handleStringChange((val) => setName(val))}
+        placeholder={"Participant name"}
+      />
+      <InputGroup
+        value={email}
+        onChange={handleStringChange((val) => setEmail(val))}
+        placeholder={"Participant email"}
       />
       <Button onClick={onSubmit}>
         Add 'em

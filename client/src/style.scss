@@ -124,17 +124,54 @@ code {
   margin-top: 3rem;
 }
 
-.card {
-  margin: 1rem;
-  flex-basis: 45%;
-  padding: 1.5rem;
-  text-align: left;
-  color: inherit;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
+// .card {
+//   flex-basis: 45%;
+//   padding: 1.5rem;
+//   text-align: left;
+//   color: inherit;
+//   transition: color 0.15s ease, border-color 0.15s ease;
+// }
 
 .tournament-card {
   margin: $comfy;
+}
+
+.participant-list {
+  display: flex;
+  max-width: 80%;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.participant-card {
+  display: flex;
+  width: fit-content;
+  flex-direction: column;
+  margin: $tiny;
+  padding: $comfy;
+  .top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    .participant-name {
+      font-weight: bold;
+    }
+    .participant-delete {
+      padding: 0;
+      // position: relative;
+      // top: -1rem;
+      // right: -1rem;
+      width: min-content;
+      height: min-content;
+    }
+  }
+  .content {
+    align-items: center;
+    .participant-email {
+      font-style: italic;
+    }
+  }
 }
 
 .card a {
