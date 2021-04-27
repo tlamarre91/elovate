@@ -12,6 +12,8 @@ export const getServerSideProps: GetServerSideProps<ViewTournamentPageProps> = a
   // TODO: factor out getTournamentProps
   let props: ViewTournamentPageProps = {};
   if (typeof id != "string") {
+    // TODO: probably throw error if it's actually something other than a
+    // string or undefined.
     return { props };
   }
   const tournament = await dbw.getTournament(id);
