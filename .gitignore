@@ -1,5 +1,3 @@
 .vscode
 gcloud-build
 **/node_modules
-**/firebase-config.js
-**/firebase-config.ts
