@@ -16,7 +16,7 @@ export default function TournamentCard(props: TournamentCardProps) {
     id,
     participantCount
   } = props.tournamentSummary;
-  const title = name.length ? name : id;
+  const title = name?.length ? name : id;
   return (
         <Card interactive={false} className="tournament-card">
           <Link href="/tournament/[id]" as={`/tournament/${id}`}>
