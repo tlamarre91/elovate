@@ -18,84 +18,84 @@ const REORDER_DELAY_MS = 3000;
  */
 const _makeRov = () => ({ randomOrderValue: Math.random() });
 
-export interface User {
-  id?: string;
-  username: string;
-}
-
 export interface DatabaseWrapperOptions {
-  db: firebase.firestore.Firestore;
-  userDocId?: string;
+  db?: firebase.firestore.Firestore | null;
+  userId?: string | null;
 }
 
 // TODO: can we make TournamentWrapper, EventWrapper, etc, and make
 // DatabaseWrapper inherit from all?
 export class DatabaseWrapper {
-  db: firebase.firestore.Firestore;
-  private userDocId: string | null;
-  constructor(opts: DatabaseWrapperOptions) {
-    this.db = opts.db;
-    this.userDocId = opts.userDocId ?? null;
+  db: firebase.firestore.Firestore | null;
+  private userId: string | null;
+  constructor(opts: DatabaseWrapperOptions = {}) {
+    this.db = opts.db ?? null;
+    this.userId = opts.userId ?? null;
   }
 
-  setUserDocId(userDocId: string | null) {
-    this.userDocId = userDocId;
+  setDatabase(db: firebase.firestore.Firestore) {
+    this.db = db;
+  }
+
+  setUserDocId(userId: string | null) {
+    this.userId = userId;
   }
 
   addTestDoc() {
-    this.db.collection("123").add({ blue: 55 });
+    console.log("adding test doc");
+    this.db?.collection("123").add({ blue: 55 });
   }
 
-  addUser(user: User) {
-    const newDoc = this.db.collection(USER_COLLECTION_ID).add(user);
-    return newDoc;
-  }
+  // addUser(user: User) {
+  //   const newDoc = this.db?.collection(USER_COLLECTION_ID).add(user);
+  //   return newDoc;
+  // }
 
   getUserDocRef() {
-    if (this.userDocId == null) {
-      throw new Error("DatabaseWrapper: userDocId not set");
+    if (this.userId == null) {
+      throw new Error("DatabaseWrapper: userId not set");
     }
-    return this.db.collection(USER_COLLECTION_ID).doc(this.userDocId);
+    return this.db?.collection(USER_COLLECTION_ID).doc(this.userId);
   }
 
   getTournamentCollection(useConverter = true) {
     let ret = this.getUserDocRef()?.collection(TOURNAMENT_COLLECTION_ID);
-    if (useConverter) ret = ret.withConverter(model.tournamentConverter);
+    // if (useConverter) ret = ret.withConverter(model.tournamentConverter);
     return ret;
   }
 
   getTournamentDocRef(tournamentId: string) {
-    // console.log(`getting tournament ${tournamentId} for user ${this.userDocId}`);
+    // TODO: don't use withConverter here
     return this.getTournamentCollection()
-      .withConverter(model.tournamentConverter)
+      ?.withConverter(model.tournamentConverter)
       .doc(tournamentId);
   }
 
   async getTournament(tournamentId: string): Promise<model.Tournament | null> {
     const ref = this.getTournamentDocRef(tournamentId);
-    const doc = await ref.get();
-    return doc.data() ?? null;
+    const doc = await ref?.get();
+    return doc?.data() ?? null;
   }
 
   /**
    * Add or update a tournament, depending on whether tournament.id is set.
    */
   async saveTournament(tournament: model.Tournament) {
-    let docRef: firebase.firestore.DocumentReference<model.Tournament>;
+    let docRef: firebase.firestore.DocumentReference<model.Tournament> | undefined;
     if (tournament.id) {
       docRef = this.getTournamentDocRef(tournament.id);
     } else {
       docRef = this.getTournamentCollection()
-        .withConverter(model.tournamentConverter)
+        ?.withConverter(model.tournamentConverter)
         .doc();
     }
-    await docRef.set(tournament);
+    await docRef?.set(tournament);
     return docRef;
   }
 
   getParticipantsCollection(tournamentId: string) {
     return this.getTournamentDocRef(tournamentId)
-      .collection(PARTICIPANT_COLLECTION_ID)
+      ?.collection(PARTICIPANT_COLLECTION_ID)
       .withConverter(model.tournamentParticipantConverter);
     // TODO: make callers call withConverter themselves
   }
@@ -105,13 +105,13 @@ export class DatabaseWrapper {
     participant: model.TournamentParticipant
   ) {
     // TODO: update tournament.participantCount
-    await this.getParticipantsCollection(tournamentId).add(participant);
+    await this.getParticipantsCollection(tournamentId)?.add(participant);
   }
 
   deleteParticipant(tournamentId: string, participantId: string) {
     // TODO: update tournament.participantCount
     return this.getParticipantsCollection(tournamentId)
-      .doc(participantId)
+      ?.doc(participantId)
       .delete();
   }
 
@@ -134,11 +134,11 @@ export class DatabaseWrapper {
     }
     if (participantIds?.length) {
       participantIds.forEach((id) => {
-        this.getParticipantsCollection(tournamentId).doc(id).update(_makeRov());
+        this.getParticipantsCollection(tournamentId)?.doc(id).update(_makeRov());
       });
     } else {
-      const ps = await this.getParticipantsCollection(tournamentId).get();
-      ps.forEach((doc) => {
+      const ps = await this.getParticipantsCollection(tournamentId)?.get();
+      ps?.forEach((doc) => {
         doc.ref.update(_makeRov());
       });
     }

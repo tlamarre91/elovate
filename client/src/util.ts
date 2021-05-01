@@ -19,3 +19,9 @@ export function handleNumberChange(handler: (value: number) => void) {
     return handleStringChange(value => handler(+value));
 }
 
+/** Is this code running in a browser? */
+export function isClientSide() {
+  const ret = typeof window != "undefined";
+  console.info(`isClientSide: ${ret}`);
+  return ret;
+}

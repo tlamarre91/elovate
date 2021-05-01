@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../../../services/db";
+import { databaseWrapper as dbw } from "../../../services";
 import EditTournamentPage, {
   EditTournamentPageProps,
 } from "../../../components/edit-tournament-page";

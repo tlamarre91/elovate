@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import { databaseWrapper as dbw } from "../../../services/db";
+import { databaseWrapper as dbw } from "../../../services";
 import ViewTournamentPage, {
   ViewTournamentPageProps,
 } from "../../../components/view-tournament-page";

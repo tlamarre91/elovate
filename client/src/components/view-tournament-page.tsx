@@ -15,7 +15,7 @@ import {
 } from "@blueprintjs/core";
 import { handleStringChange } from "../util";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../services/db";
+import { databaseWrapper as dbw } from "../services";
 import Layout from "../components/layout";
 import ParticipantAdder from "../components/participant-adder";
 import ParticipantCard, {
@@ -84,7 +84,6 @@ export default function ViewTournamentPage(props: ViewTournamentPageProps) {
   }, []);
 
   const participantList = useMemo(() => {
-    console.log("participantList memo");
     const cards = participantProps.map((p) => {
       const props: ParticipantCardProps = {
         onRemove: removeParticipant,
@@ -98,52 +97,52 @@ export default function ViewTournamentPage(props: ViewTournamentPageProps) {
 
   useEffect(() => {
     // TODO: unsubscribe after some timeout
-    if (subscribeToParticipants && id) {
-      // Creating a new array here so onSnapshot is always writing to the same
-      // array so we don't have to read participantProps state. This does mean
-      // we have to slice() the array to get React to see changes.
-      let participantProps: ParticipantCardProps[] = [];
-      const unsubscribe = dbw
-        .getParticipantsCollection(id)
-        .onSnapshot((snapshot) => {
-          console.log("PRE");
-          console.log(participantProps);
-          const changes = snapshot.docChanges();
-          console.log(`${changes.length} changes`);
-          snapshot.docChanges().forEach((change) => {
-            if (change.type == "added") {
-              const data = change.doc.data();
-              const newParticipant = {
-                id: change.doc.id,
-                name: data.name,
-                email: data.email,
-                createdAt: data.createdAt.toMillis(),
-              };
-              participantProps.push(newParticipant);
-            } else if (change.type == "modified") {
-              // TODO
-            } else if (change.type == "removed") {
-              // TODO: figure out how to use change.oldIndex to figure out
-              // which participant got dropped. Not as simple as splice(oldIndex, 1).
-              console.log(change.doc.id);
-              console.log(change.oldIndex);
-              const index = participantProps.findIndex(
-                (p) => p.id == change.doc.id
-              );
-              participantProps.splice(index, 1);
-            }
-          });
-          // TODO: use a reducer. This solution has behavior like rendering an
-          // empty participant list when opening a new subscription.
-          setParticipantProps(participantProps.slice());
-        });
-      // TODO: setTimeout here to call setSubscribeToParticipants(false) to
-      // close subscription after timeout. But we'll need to manage the timeout
-      // to reset it on user interaction.
-      return unsubscribe;
-    } else {
-      console.log(`subscribeToParticipants: ${subscribeToParticipants}`);
+    if (!(subscribeToParticipants && id)) {
+      return;
     }
+    // Creating a new array here so onSnapshot is always writing to the same
+    // array so we don't have to read participantProps state. This does mean
+    // we have to slice() the array to get React to see changes.
+    let participantProps: ParticipantCardProps[] = [];
+    const unsubscribe = dbw
+      .getParticipantsCollection(id)
+      ?.onSnapshot((snapshot) => {
+        const changes = snapshot.docChanges();
+        console.log(`onSnapshot: got ${changes.length} changes`);
+        snapshot.docChanges().forEach((change) => {
+          if (change.type == "added") {
+            const data = change.doc.data();
+            const newParticipant = {
+              id: change.doc.id,
+              name: data.name,
+              email: data.email,
+              createdAt: data.createdAt.toMillis(),
+            };
+            participantProps.push(newParticipant);
+          } else if (change.type == "modified") {
+            const index = participantProps.findIndex(
+              (p) => p.id == change.doc.id
+            );
+            if (index == -1) {
+              // TODO: can we expect to get "modified" change.type for a
+              // participant.id we haven't seen?
+            }
+          } else if (change.type == "removed") {
+            const index = participantProps.findIndex(
+              (p) => p.id == change.doc.id
+            );
+            if (index == -1) return;
+            participantProps.splice(index, 1);
+          }
+        });
+        // TODO: use a reducer. This solution has behavior like rendering an
+        // empty participant list when opening a new subscription.
+        setParticipantProps(participantProps.slice());
+      });
+    // TODO: setTimeout here to call setSubscribeToParticipants(false) to
+    // close subscription after timeout. But we'll need to manage the timeout
+    // to reset it on user interaction.
+    return unsubscribe;
   }, [subscribeToParticipants]);
 
   return (

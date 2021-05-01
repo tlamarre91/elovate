@@ -1,6 +1,6 @@
 import * as React from "react";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../services/db";
+import { databaseWrapper as dbw } from "../services";
 import Layout from "../components/layout";
 
 export default function Home() {

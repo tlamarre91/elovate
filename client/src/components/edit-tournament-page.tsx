@@ -14,7 +14,7 @@ import {
 } from "@blueprintjs/core";
 import { handleStringChange } from "../util";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../services/db";
+import { databaseWrapper as dbw } from "../services";
 import Layout from "../components/layout";
 import ParticipantAdder from "../components/participant-adder";
 import ParticipantCard, {

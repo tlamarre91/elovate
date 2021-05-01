@@ -35,15 +35,19 @@ header {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-header a {
-  margin: 0 1rem;
-  height: max-content;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: $pt-intent-primary;
+  justify-content: space-between;
+  a {
+    margin: 0 1rem;
+    height: max-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $pt-intent-primary;
+  }
+  .links {
+    display: flex;
+    flex-direction: row;
+  }
 }
 
 main {
