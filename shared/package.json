@@ -14,6 +14,7 @@
     "watch": "yarn tsc -p tsconfig.json --watch"
   },
   "dependencies": {
-    "firebase": "^8.4.1"
+    "firebase": "^8.4.1",
+    "firebase-admin": "^9.7.0"
   }
 }

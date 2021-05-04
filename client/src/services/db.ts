@@ -1,18 +1,22 @@
-import { DatabaseWrapper, firebaseConfig } from "shared";
-
 import firebase from "firebase/app";
 import "firebase/firestore";
 
-let userId: string | null = "TEST_USER";
-let db: firebase.firestore.Firestore | null = null;
-if (firebase.apps.length) {
-  db = firebase.firestore();
-}
-const opts = {
-  db,
-  userId
-};
-export const databaseWrapper: DatabaseWrapper = new DatabaseWrapper(opts);;
+import { DatabaseWrapper } from "shared";
+import { isClientSide } from "../util";
+
+// let userId: string | null = "TEST_USER";
+// let db: FirestoreAdminOrClient | null = null;
+// let auth: firebase.auth.Auth | null = null;
+// if (firebase.apps.length) {
+//   db = firebase.firestore();
+//   auth = firebase.auth();
+// }
+// const opts = {
+//   db,
+//   auth,
+//   userId,
+// };
+// export const databaseWrapper: DatabaseWrapper = new DatabaseWrapper(opts);
 
 export function initializeDb() {
   console.log("initializeDb");
@@ -36,30 +40,19 @@ export function initializeDb() {
   }
 
   if (db == undefined) {
-    throw new Error("initializeDb: Could not get Firestore database instance");
+    throw new Error("initializeDb: Could not initialize Firestore");
   }
-
-  databaseWrapper.setDatabase(db);
 }
 
-// import "firebase/functions";
+let databaseWrapper: DatabaseWrapper | null = null;
 
-// let db: firebase.firestore.Firestore;
-// if (!firebase.apps.length) {
-//   firebase.initializeApp(firebaseConfig);
-//   db = firebase.firestore();
-//   if (env.NEXT_PUBLIC_USE_FIRESTORE_EMULATOR) {
-//     db.useEmulator(env.NEXT_PUBLIC_FIRESTORE_HOST, env.NEXT_PUBLIC_FIRESTORE_PORT);
-//   }
-// } else {
-//   db = firebase.firestore();
-// }
-
-// export let databaseWrapper: DatabaseWrapper;
-// if (db != undefined) {
-//   const userId = "TEST_USER";
-//   const opts = { db, userId };
-//   databaseWrapper = new DatabaseWrapper(opts);
-// } else {
-//   console.error("Could not get Firestore database instance.");
-// }
+export function getDatabaseWrapper(userId?: string) {
+  if (databaseWrapper == null) {
+    let firestore = firebase.firestore();
+    if (firestore == undefined) {
+      console.warn("getDatabaseWrapper: Could not get Firestore instance");
+    }
+    databaseWrapper = new DatabaseWrapper({ db: firestore, userId });
+  }
+  return databaseWrapper;
+}

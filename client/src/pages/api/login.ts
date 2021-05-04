@@ -2,8 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { setAuthCookies } from "next-firebase-auth";
 import Cookies from "cookies";
 
-import { initialize } from "../../services";
-initialize();
+import "../../services";
 
 export default async function loginHandler(
   req: NextApiRequest,

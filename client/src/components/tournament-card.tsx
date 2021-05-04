@@ -7,7 +7,9 @@ import {
 } from "@blueprintjs/core";
 import { model } from "shared";
 export interface TournamentCardProps {
-  tournamentSummary: model.TournamentSummary;
+  name: string;
+  id: string,
+  participantCount?: number;
 }
 
 export default function TournamentCard(props: TournamentCardProps) {
@@ -15,7 +17,7 @@ export default function TournamentCard(props: TournamentCardProps) {
     name,
     id,
     participantCount
-  } = props.tournamentSummary;
+  } = props;
   const title = name?.length ? name : id;
   return (
         <Card interactive={false} className="tournament-card">

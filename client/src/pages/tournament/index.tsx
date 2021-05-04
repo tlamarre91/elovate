@@ -1,59 +1,57 @@
 import * as React from "react";
+import type firebase from "firebase/app";
 import { useRouter } from "next/router";
 import { GetStaticProps, GetStaticPaths, GetServerSideProps } from "next";
-import Head from 'next/head'
-import {
-  useAuthUser,
-  withAuthUser,
-  withAuthUserTokenSSR,
-  AuthAction,
-  AuthUserContext,
-} from "next-firebase-auth";
+import Head from "next/head";
+import { useAuthUser, withAuthUser } from "next-firebase-auth";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../../services";
+import { getDatabaseWrapper } from "../../services";
 import Layout from "../../components/layout";
-import TournamentCard from "../../components/tournament-card";
+import TournamentCard, {
+  TournamentCardProps,
+} from "../../components/tournament-card";
 
 export interface TournamentIndexProps {
-  tournamentSummaries: model.TournamentSummary[];
+  // tournamentSummaries: model.TournamentSummary[];
 }
 
-// Put component in ../../components/tournament-index.tsx
-export default function TournamentIndex({ tournamentSummaries }: TournamentIndexProps) {
-  const tournamentCards = tournamentSummaries.map((ts) => {
-    return (
-      <TournamentCard tournamentSummary={ts} />
-    );
-  })
+// TODO: Put component in ../../components/tournament-index.tsx
+function TournamentIndex(props: TournamentIndexProps) {
+  const user = useAuthUser();
+  const [tournamentCardProps, setTournamentCardProps] = React.useState<
+    TournamentCardProps[]
+  >([]);
+  const tournamentCards = tournamentCardProps.map((props) => {
+    return <TournamentCard {...props} />;
+  });
+
+  React.useEffect(() => {
+    if (user?.id) {
+      const dbw = getDatabaseWrapper();
+      const snapshot = dbw
+        .getTournamentCollection()
+        ?.get()
+        .then((snapshot) => {
+          const tournamentCardProps: TournamentCardProps[] = snapshot?.docs.map(
+            (doc) => {
+              const tournament = doc.data();
+              return {
+                name: tournament.name ?? null,
+                id: doc.id ?? null,
+                participantCount: tournament.participantCount ?? null,
+              };
+            }
+          );
+          setTournamentCardProps(tournamentCardProps);
+        });
+    }
+  }, [user]);
+
   return (
     <Layout>
-      <div>
-        {tournamentCards}
-      </div>
+      <div>{tournamentCards}</div>
     </Layout>
   );
 }
 
-// TODO: don't use `any`. For some reason, the type that gets produced by
-// passing an async function isn't compatible with GetServerSideProps.
-export const getServerSideProps: any = withAuthUserTokenSSR()(async function fn(context) {
-  const { AuthUser, params } = context;
-  console.log("AuthUser");
-  console.log(AuthUser);
-  dbw.setUserDocId(AuthUser.id);
-  const snapshot = await dbw.getTournamentCollection()?.get();
-  // TODO: use snapshot.docChanges instead.
-  const tournamentSummaries = snapshot?.docs.map((doc) => {
-    const tournament = doc.data();
-    return {
-      name: tournament.name,
-      id: doc.id,
-      participantCount: tournament.participantCount
-    };
-  });
-  return {
-    props: {
-      tournamentSummaries
-    }
-  };
-});
+export default withAuthUser<TournamentIndexProps>()(TournamentIndex);

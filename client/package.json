@@ -15,7 +15,7 @@
     "@blueprintjs/popover2": "^0.7.1",
     "cookies": "^0.8.0",
     "firebase": "^8.4.1",
-    "firebase-admin": "^9.2.0",
+    "firebase-admin": "^9.7.0",
     "next": "^10.0.0",
     "next-firebase-auth": "^0.13.1-alpha.0",
     "react": "17.0.1",

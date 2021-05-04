@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { unsetAuthCookies } from "next-firebase-auth";
 
-import { initialize } from "../../services";
-initialize();
+import "../../services";
 
 export default async function logoutHandler(
   req: NextApiRequest,

@@ -17,22 +17,30 @@ import {
 } from "@blueprintjs/core";
 import { Popover2 as Popover } from "@blueprintjs/popover2";
 
-export interface UserMenuProps {}
+export interface UserMenuProps {
+  test: number
+}
 
 function UserMenu(props: UserMenuProps) {
   const user = useAuthUser();
-  console.log(user);
-  const user2 = firebase.auth().currentUser;
-  console.log(user2);
-  const name = user.email;
+  const [name, setName] = useState("");
+  // console.log("user");
+  // console.log(user);
+  // pretty sure this *doesn't* work on the server.
+  // const user2 = firebase.auth().currentUser;
+  // console.log("firebase.auth().currentUser");
+  // console.log(user2);
   const menu = useMemo(() => {
+    const name = user.email;
     if (name) {
+      setName(name);
       return (
         <Menu>
           <MenuItem icon="log-out" text="Sign out" onClick={user.signOut} />
         </Menu>
       );
     } else {
+      setName("");
       return (
         <Menu>
           <Link href="/auth">
@@ -49,8 +57,8 @@ function UserMenu(props: UserMenuProps) {
         <Button minimal={true} icon="user" text={name} />
       </Popover>
     );
-  }, [user]);
+  }, [name]);
   return popover;
 }
 
-export default withAuthUser()(UserMenu);
+export default withAuthUser<UserMenuProps>()(UserMenu);

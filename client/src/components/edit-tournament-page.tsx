@@ -12,41 +12,71 @@ import {
   Intent,
   Tag,
 } from "@blueprintjs/core";
+import { useAuthUser, withAuthUser } from "next-firebase-auth";
 import { handleStringChange } from "../util";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../services";
+import { getDatabaseWrapper } from "../services";
 import Layout from "../components/layout";
 import ParticipantAdder from "../components/participant-adder";
 import ParticipantCard, {
   ParticipantCardProps,
 } from "../components/participant-card";
 
-type ParticipantSummary = Pick<model.TournamentParticipant, "id" | "name">;
+// type ParticipantSummary = Pick<model.TournamentParticipant, "id" | "name">;
 
-export interface EditTournamentPageProps extends model.TournamentProps {}
+export interface EditTournamentPageProps {
+  tournamentId?: string | null;
+}
 
-export default function EditTournamentById(props: EditTournamentPageProps) {
+function EditTournamentPage(props: EditTournamentPageProps) {
+  const user = useAuthUser();
+  const [pageReady, setPageReady] = useState(false);
   const router = useRouter();
   const [modified, setModified] = useState(false);
   const setModifiedTrue = useCallback(() => {
     if (!modified) setModified(true);
   }, []);
-  const [id, setId] = useState(props.id ?? null);
-  const [name, setName] = useState(props.name ?? "");
-  const [createdAt, setCreatedAt] = useState(props.createdAt ?? Date.now());
+  const [id, setId] = useState(props.tournamentId);
+  const [name, setName] = useState("");
+  const [createdAt, setCreatedAt] = useState(Date.now());
+
+  useEffect(() => {
+    if (user?.id && id?.length) {
+      const dbw = getDatabaseWrapper();
+      dbw.getTournament(id).then((tournament) => {
+        // console.log(tournament);
+        if (tournament != null) {
+          setName(tournament.name ?? "");
+          setCreatedAt(tournament.createdAt.toMillis());
+        }
+        setPageReady(true);
+      });
+    }
+  }, [user]);
+
   const onClickSave = useCallback(async () => {
-    const obj: Partial<model.Tournament> = {
-      name,
-      createdAt: firebase.firestore.Timestamp.fromMillis(createdAt),
-    };
-    if (id) obj.id = id;
-    const tournament = new model.Tournament(obj);
-    const saved = await dbw.saveTournament(tournament);
-    if (id) {
-      setModified(false);
-    } else {
-      const id = saved.id;
-      router.push(`/tournament/${id}`);
+    try {
+      const obj: Partial<model.Tournament> = {
+        name,
+        createdAt: firebase.firestore.Timestamp.fromMillis(createdAt),
+      };
+      if (id) obj.id = id;
+      const tournament = new model.Tournament(obj);
+      const dbw = getDatabaseWrapper(); // TODO: implement useDatabaseWrapper hook
+      const saved = await dbw.saveTournament(tournament);
+      if (id) {
+        setModified(false);
+      } else {
+        if (saved != undefined) {
+          const id = saved.id;
+          router.push(`/tournament/${id}`);
+        } else {
+          console.error("EditTournamentPage: could not save new tournament");
+        }
+      }
+    } catch (err) {
+      console.error("EditTournamentPage");
+      console.error(err);
     }
   }, [name]);
 
@@ -83,3 +113,5 @@ export default function EditTournamentById(props: EditTournamentPageProps) {
     </Layout>
   );
 }
+
+export default withAuthUser<EditTournamentPageProps>()(EditTournamentPage);

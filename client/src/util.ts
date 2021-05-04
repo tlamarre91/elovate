@@ -1,3 +1,4 @@
+import * as React from "react";
 /** copied from @blueprintjs/docs-theme/src/components/baseExample.tsx */
 /** Event handler that exposes the target element's value as a boolean. */
 export function handleBooleanChange(handler: (checked: boolean) => void) {
@@ -24,4 +25,12 @@ export function isClientSide() {
   const ret = typeof window != "undefined";
   console.info(`isClientSide: ${ret}`);
   return ret;
+}
+
+export function useClientEffect(effect: React.EffectCallback) {
+  if (isClientSide()) {
+    React.useEffect(effect);
+  } else {
+    React.useEffect(() => {}); // TODO: do we need this?
+  }
 }

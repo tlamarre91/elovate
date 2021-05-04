@@ -1,26 +1,17 @@
 import { GetServerSideProps } from "next";
+import { withAuthUserTokenSSR } from "next-firebase-auth";
+import firebase from "firebase/app";
 import { model } from "shared";
-import { databaseWrapper as dbw } from "../../../services";
+import { getDatabaseWrapper } from "../../../services";
 import EditTournamentPage, {
   EditTournamentPageProps,
 } from "../../../components/edit-tournament-page";
 
+export const getServerSideProps: GetServerSideProps<EditTournamentPageProps> = async (context) => {
+  let tournamentId = context.params?.id ?? null;
+  if (typeof tournamentId != "string") {
+    return { props: {} };
+  }
+  return { props: { tournamentId } };
+}
 export default EditTournamentPage;
-// export function makeTournamentProps(tournament: model.Tournament): TournamentProps {
-// }
-export const getServerSideProps: GetServerSideProps<EditTournamentPageProps> = async ({
-  params,
-}) => {
-  let id = params?.id;
-  let props: EditTournamentPageProps = { };
-  if (typeof id != "string") {
-    return { props };
-  }
-  const tournament = await dbw.getTournament(id);
-  if (tournament == null) {
-    return { props };
-  }
-  props = tournament.toProps();
-  props.id = id;
-  return { props };
-};

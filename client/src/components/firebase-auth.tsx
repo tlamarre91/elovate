@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import StyledFirebaseAuth from "react-firebaseui/StyledFirebaseAuth";
 import firebase from "firebase/app";
 import "firebase/auth";
 
 import { isClientSide } from "../util";
 
-import { initialize } from "../services";
-initialize();
+// import { initialize } from "../services";
+// initialize();
 
 const firebaseAuthConfig = {
   signInFlow: "popup",
@@ -17,6 +17,9 @@ const firebaseAuthConfig = {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
       requireDisplayName: false,
     },
+    // {
+    //   provider: firebase.auth.GoogleAuthProvider
+    // }
   ],
   signInSuccessUrl: "/",
   credentialHelper: "none",
@@ -32,25 +35,20 @@ const firebaseAuthConfig = {
 function FirebaseAuth() {
   // Do not SSR FirebaseUI, because it is not supported.
   // https://github.com/firebase/firebaseui-web/issues/213
-  const [renderAuth, setRenderAuth] = useState(false);
   const fbAuth = firebase.auth();
-  console.warn("logpoint23321");
-  console.warn(fbAuth);
+  const styledFirebaseAuth = useMemo(() => {
+    return isClientSide() ? (
+      <StyledFirebaseAuth uiConfig={firebaseAuthConfig} firebaseAuth={fbAuth} />
+    ) : null;
+  }, []);
   // useEffect(() => {
-  //   if (isClientSide()) {
-  //     setRenderAuth(true);
-  //   }
+  //   const unsub = firebase.auth().onAuthStateChanged(user => {
+  //     console.log("FirebaseAuth");
+  //     console.log(user);
+  //   });
+  //   return unsub;
   // }, []);
-  return (
-    <div>
-      {isClientSide() ? (
-        <StyledFirebaseAuth
-          uiConfig={firebaseAuthConfig}
-          firebaseAuth={fbAuth}
-        />
-      ) : null}
-    </div>
-  );
+  return <div>{styledFirebaseAuth}</div>;
 }
 
 export default FirebaseAuth;
